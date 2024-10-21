@@ -1,16 +1,17 @@
 import streamlit as st
-import gdown
 import tensorflow as tf
 import pickle
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
+import gdown
 
+@st.cache_resource
 def load_model():
      url = 'https://drive.google.com/ud?id=1L_vCM0lUTI3tejprp_O1KYUqPnUn-7e-'
      gdown.download(url, 'model_seer_keras')
      loaded_model = tf.keras.models.load_model('model_seer.keras')
      with open ('vectorizer.pkl', 'rb') as file:
-          vectorizer = pickel.load(file)
+          vectorizer = pickle.load(file)
 
     return loaded_model, vectorizer
 
@@ -54,6 +55,7 @@ def predict_next_words(model, vectorizer, text, max_sequence_len, top_k=3):
 
 def main():
 
+    max_vocab_size = 20000
     max_sequence_len = 50
 
     #load the model
