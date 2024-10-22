@@ -7,30 +7,17 @@ import gdown
 
 @st.cache_resource
 def load_model():
-     url = 'https://drive.google.com/ud?id=1L_vCM0lUTI3tejprp_O1KYUqPnUn-7e-'
+     url = 'https://drive.google.com/uc?id=1L_vCM0lUTI3tejprp_O1KYUqPnUn-7e-'
      gdown.download(url, 'model_seer_keras')
      loaded_model = tf.keras.models.load_model('model_seer.keras')
-     with open ('vectorizer.pkl', 'rb') as file:
-          vectorizer = pickle.load(file)
+     with open('vectorizer.pkl', 'rb') as file:
+         vectorizer = pickle.load(file)
 
-    return loaded_model, vectorizer
+     return loaded_model, vectorizer
 
-# código omitido
+# Função omitida
 
 def predict_next_words(model, vectorizer, text, max_sequence_len, top_k=3):
-    """
-    Prediz as próximas palavras mais prováveis em uma sequência de texto.
-
-    Args:
-        model: O modelo treinado.
-        vectorizer: A camada de vetorização.
-        text: O texto de entrada.
-        max_sequence_len: O comprimento máximo da sequência usado na vetorização.
-        top_k: O número de palavras mais prováveis a serem retornadas.
-
-    Returns:
-        As próximas palavras mais prováveis.
-    """
     # Vetorizar o texto de entrada
     tokenized_text = vectorizer([text])
 
@@ -41,7 +28,7 @@ def predict_next_words(model, vectorizer, text, max_sequence_len, top_k=3):
     padded_text = pad_sequences([tokenized_text], maxlen=max_sequence_len, padding='pre')
 
     # Fazer a previsão
-    predicted_probs = model.predict(padded_text, verbose=0)[0]  # Remove a dimensão extra adicionada pela previsão
+    predicted_probs = model.predict(padded_text, verbose=0)[0]
 
     # Obter os índices dos top_k tokens com as maiores probabilidades
     top_k_indices = np.argsort(predicted_probs)[-top_k:][::-1]
@@ -51,33 +38,30 @@ def predict_next_words(model, vectorizer, text, max_sequence_len, top_k=3):
 
     return predicted_words
 
-# código omitido
+# Função omitida
 
 def main():
-
     max_vocab_size = 20000
     max_sequence_len = 50
 
-    #load the model
-    loaded_model, vectorizer
+    # Carregar o modelo e vetorizar
+    loaded_model, vectorizer = load_model()
 
     st.title('Next Word Prediction')
     input_text = st.text_input('Enter a text string:')
 
     if st.button('Predict'):
-         if input_text:
-              try:
-                   predicted_words = predicted_next_words(load_model, vectorizer, input_text, max_sequence_len)
-                   st.info('Most likely words')
+        if input_text:
+            try:
+                predicted_words = predict_next_words(loaded_model, vectorizer, input_text, max_sequence_len)
+                st.info('Most likely words:')
 
-                   for word in predicted_words:
-                        st.sucess(word)
-                except:
-                   st.error('Error in prediction {e}')
-
+                for word in predicted_words:
+                    st.success(word)
+            except Exception as e:
+                st.error(f'Error in prediction: {e}')
         else:
             st.warning('Please insert some text')
 
-
 if __name__ == "__main__":
-     main()
+    main()
